@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Navbar from './components/Navbar.tsx';
 import LeftSidebar from './components/LeftSidebar.tsx';
 import RightSidebar from './components/RightSidebar.tsx';
@@ -18,9 +18,13 @@ function App() {
 
   // Build filters for channels query
   const channelFilters: ChannelFilters = {};
-  if (searchQuery) channelFilters.q = searchQuery;
-  if (selectedCategory) channelFilters.q = selectedCategory;
-  if (selectedTags.length > 0) channelFilters.q = selectedTags[0]; // Backend supports single tag filter
+  if (searchQuery) {
+    channelFilters.q = searchQuery;
+  } else if (selectedCategory) {
+    channelFilters.q = selectedCategory;
+  } else if (selectedTags.length > 0) {
+    channelFilters.q = selectedTags[0]; // Backend supports single tag filter
+  }
 
   const { data: channels = [], isLoading: channelsLoading, error: channelsError } = useChannels(channelFilters);
 
@@ -35,19 +39,35 @@ function App() {
   });
 
   const handleCategorySelect = (categoryName: string) => {
-    setSelectedCategory(selectedCategory === categoryName ? null : categoryName);
+    const willSelect = selectedCategory !== categoryName;
+    setSelectedCategory(willSelect ? categoryName : null);
+    if (willSelect) {
+      setSelectedTags([]);
+      setSearchQuery('');
+    }
   };
 
   const handleTagSelect = (tagName: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tagName) 
+    setSelectedTags(prev => {
+      const next = prev.includes(tagName)
         ? prev.filter(tag => tag !== tagName)
-        : [...prev, tagName]
-    );
+        : [...prev, tagName];
+
+      if (next.length > 0) {
+        setSelectedCategory(null);
+        setSearchQuery('');
+      }
+
+      return next;
+    });
   };
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
+    if (query) {
+      setSelectedCategory(null);
+      setSelectedTags([]);
+    }
   };
 
   // Show loading state if any data is loading
@@ -83,7 +103,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar onSearch={handleSearch} />
+      <Navbar onSearch={handleSearch} query={searchQuery} />
       <div className="flex">
         <LeftSidebar 
           categories={categories}

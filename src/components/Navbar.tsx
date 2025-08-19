@@ -1,12 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ytLogo from '/yt.png';
 
 interface NavbarProps {
   onSearch: (query: string) => void;
+  query?: string;
 }
 
-const Navbar = ({ onSearch }: NavbarProps) => {
+const Navbar = ({ onSearch, query }: NavbarProps) => {
   const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    setSearchQuery(query ?? '');
+  }, [query]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
