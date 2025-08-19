@@ -3,7 +3,6 @@ import Navbar from './components/Navbar.tsx';
 import LeftSidebar from './components/LeftSidebar.tsx';
 import RightSidebar from './components/RightSidebar.tsx';
 import MainContent from './components/MainContent.tsx';
-import LoadingSpinner from './components/LoadingSpinner.tsx';
 import { useCategories, useTags, useChannels } from './hooks/useApi';
 import type { ChannelFilters } from './types';
 
@@ -13,8 +12,8 @@ function App() {
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // API data fetching with React Query
-  const { data: categories = [], isLoading: categoriesLoading, error: categoriesError } = useCategories();
-  const { data: tags = [], isLoading: tagsLoading, error: tagsError } = useTags();
+  const { data: categories = [], error: categoriesError } = useCategories();
+  const { data: tags = [], error: tagsError } = useTags();
 
   // Build filters for channels query
   const channelFilters: ChannelFilters = {};
@@ -63,36 +62,9 @@ function App() {
     }
   };
 
-  // Show loading state if any data is loading
-  if (categoriesLoading || tagsLoading || channelsLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
+  // Do not block the full layout on loading; only MainContent will show a spinner for channels
 
-  // Show error state if any data failed to load
-  if (categoriesError || tagsError || channelsError) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Failed to load data
-          </h1>
-          <p className="text-gray-600 mb-4">
-            Please check your connection and try again.
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // Keep layout visible even if some data failed; show a lightweight banner instead of a full-screen block
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -103,7 +75,14 @@ function App() {
           selectedCategory={selectedCategory}
           onCategorySelect={handleCategorySelect}
         />
-        <MainContent channels={filteredChannels} />
+        <div className="flex-1">
+          {(categoriesError || tagsError || channelsError) && (
+            <div className="bg-yellow-50 border-b border-yellow-200 text-yellow-800 text-sm px-4 py-2">
+              Some data failed to load. You can still browse available content. Try refresh.
+            </div>
+          )}
+          <MainContent channels={filteredChannels} isLoading={channelsLoading} />
+        </div>
         <RightSidebar 
           tags={tags}
           selectedTags={selectedTags}

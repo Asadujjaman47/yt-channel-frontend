@@ -1,13 +1,29 @@
 import type { Channel } from '../types';
+import LoadingSpinner from './LoadingSpinner.tsx';
 
 interface MainContentProps {
   channels: Channel[];
+  isLoading?: boolean;
 }
 
-const MainContent = ({ channels }: MainContentProps) => {
+const MainContent = ({ channels, isLoading = false }: MainContentProps) => {
   const handleChannelClick = (url: string) => {
     window.open(url, '_blank');
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 p-6">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">Loading channels...</h1>
+          <p className="text-gray-600">Please wait while we fetch the latest channels.</p>
+        </div>
+        <div className="flex items-center justify-center h-64">
+          <LoadingSpinner size="lg" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 p-6">
@@ -76,11 +92,11 @@ const MainContent = ({ channels }: MainContentProps) => {
                 <div className="grid grid-cols-2 gap-2 text-gray-500">
                   <div>
                     <span className="font-medium">Created:</span>
-                    <p className="mt-0.5">{channel["Created time"]}</p>
+                    <p className="mt-0.5">{new Date(channel.createdAt).toLocaleString()}</p>
                   </div>
                   <div>
                     <span className="font-medium">Last Edited:</span>
-                    <p className="mt-0.5">{channel["Last edited time"]}</p>
+                    <p className="mt-0.5">{new Date(channel.updatedAt).toLocaleString()}</p>
                   </div>
                 </div>
               </div>
