@@ -21,22 +21,15 @@ function App() {
   if (searchQuery) {
     channelFilters.q = searchQuery;
   } else if (selectedCategory) {
-    channelFilters.q = selectedCategory;
+    channelFilters.category = selectedCategory;
   } else if (selectedTags.length > 0) {
-    channelFilters.q = selectedTags[0]; // Backend supports single tag filter
+    channelFilters.tags = selectedTags;
   }
 
   const { data: channels = [], isLoading: channelsLoading, error: channelsError } = useChannels(channelFilters);
 
-  // Additional client-side filtering for multiple tags
-  const filteredChannels = channels.filter(channel => {
-    if (selectedTags.length === 0) return true;
-    
-    const channelTags = channel.tags.split(', ').map(tag => tag.trim().toLowerCase());
-    return selectedTags.some(selectedTag => 
-      channelTags.some(tag => tag.includes(selectedTag.toLowerCase()))
-    );
-  });
+  // Backend handles filtering; use channels directly
+  const filteredChannels = channels;
 
   const handleCategorySelect = (categoryName: string) => {
     const willSelect = selectedCategory !== categoryName;

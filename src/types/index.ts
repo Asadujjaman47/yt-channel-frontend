@@ -36,6 +36,6 @@ export interface ApiResponse<T> {
 // Query parameters for filtering
 export interface ChannelFilters {
   q?: string;
-  tag?: string;
+  tags?: string[];
   category?: string;
 }
