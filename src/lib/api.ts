@@ -63,8 +63,8 @@ export const apiService = {
   getChannels: async (filters?: ChannelFilters): Promise<Channel[]> => {
     const params = new URLSearchParams();
     if (filters?.q) params.append('q', filters.q);
-    if (filters?.tag) params.append('tag', filters.tag);
-    if (filters?.category) params.append('category', filters.category);
+    // if (filters?.tag) params.append('tag', filters.tag);
+    // if (filters?.category) params.append('category', filters.category);
 
     const response = await api.get<Channel[]>(`/channels?${params.toString()}`);
     return response.data;

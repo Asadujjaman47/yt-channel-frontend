@@ -19,8 +19,8 @@ function App() {
   // Build filters for channels query
   const channelFilters: ChannelFilters = {};
   if (searchQuery) channelFilters.q = searchQuery;
-  if (selectedCategory) channelFilters.category = selectedCategory;
-  if (selectedTags.length > 0) channelFilters.tag = selectedTags[0]; // Backend supports single tag filter
+  if (selectedCategory) channelFilters.q = selectedCategory;
+  if (selectedTags.length > 0) channelFilters.q = selectedTags[0]; // Backend supports single tag filter
 
   const { data: channels = [], isLoading: channelsLoading, error: channelsError } = useChannels(channelFilters);
 
