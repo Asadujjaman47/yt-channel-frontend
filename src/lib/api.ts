@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Category, Channel, Tag, ChannelFilters } from '../types';
+import type { Category, Channel, Tag, ChannelFilters, PaginatedResult } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api';
 
@@ -60,15 +60,17 @@ export const apiService = {
   },
 
   // Channels
-  getChannels: async (filters?: ChannelFilters): Promise<Channel[]> => {
+  getChannels: async (filters?: ChannelFilters): Promise<PaginatedResult<Channel>> => {
     const params = new URLSearchParams();
     if (filters?.q) params.append('q', filters.q);
     if (filters?.tags && filters.tags.length > 0) {
       filters.tags.forEach(tag => params.append('tags', tag));
     }
     if (filters?.category) params.append('category', filters.category);
+    if (typeof filters?.page === 'number') params.append('page', String(filters.page));
+    if (typeof filters?.limit === 'number') params.append('limit', String(filters.limit));
 
-    const response = await api.get<Channel[]>(`/channels?${params.toString()}`);
+    const response = await api.get<PaginatedResult<Channel>>(`/channels?${params.toString()}`);
     return response.data;
   },
 

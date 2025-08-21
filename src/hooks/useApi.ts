@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiService } from '../lib/api';
-import type { Category, Channel, Tag, ChannelFilters } from '../types';
+import type { Category, Channel, Tag, ChannelFilters, PaginatedResult } from '../types';
 
 // Query keys for React Query
 export const queryKeys = {

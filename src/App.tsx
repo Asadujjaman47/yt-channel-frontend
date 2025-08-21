@@ -10,13 +10,15 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [page, setPage] = useState<number>(1);
+  const [limit, setLimit] = useState<number>(20);
 
   // API data fetching with React Query
   const { data: categories = [], error: categoriesError } = useCategories();
   const { data: tags = [], error: tagsError } = useTags();
 
   // Build filters for channels query
-  const channelFilters: ChannelFilters = {};
+  const channelFilters: ChannelFilters = { page, limit };
   if (searchQuery) {
     channelFilters.q = searchQuery;
   } else if (selectedCategory) {
@@ -25,14 +27,15 @@ function App() {
     channelFilters.tags = selectedTags;
   }
 
-  const { data: channels = [], isLoading: channelsLoading, error: channelsError } = useChannels(channelFilters);
+  const { data: channelsPage, isLoading: channelsLoading, error: channelsError } = useChannels(channelFilters);
 
-  // Backend handles filtering; use channels directly
-  const filteredChannels = channels;
+  const filteredChannels = channelsPage?.items ?? [];
+  const paginationMeta = channelsPage?.meta;
 
   const handleCategorySelect = (categoryName: string) => {
     const willSelect = selectedCategory !== categoryName;
     setSelectedCategory(willSelect ? categoryName : null);
+    setPage(1);
     if (willSelect) {
       setSelectedTags([]);
       setSearchQuery('');
@@ -48,6 +51,7 @@ function App() {
       if (next.length > 0) {
         setSelectedCategory(null);
         setSearchQuery('');
+        setPage(1);
       }
 
       return next;
@@ -60,6 +64,15 @@ function App() {
       setSelectedCategory(null);
       setSelectedTags([]);
     }
+    setPage(1);
+  };
+
+  const handlePageChange = (nextPage: number) => {
+    setPage(Math.max(1, nextPage));
+  };
+  const handleLimitChange = (nextLimit: number) => {
+    setLimit(nextLimit);
+    setPage(1);
   };
 
   // Do not block the full layout on loading; only MainContent will show a spinner for channels
@@ -81,7 +94,16 @@ function App() {
               Some data failed to load. You can still browse available content. Try refresh.
             </div>
           )}
-          <MainContent channels={filteredChannels} isLoading={channelsLoading} />
+          <MainContent 
+            channels={filteredChannels} 
+            isLoading={channelsLoading}
+            page={page}
+            limit={limit}
+            total={paginationMeta?.total ?? 0}
+            totalPages={paginationMeta?.totalPages ?? 1}
+            onPageChange={handlePageChange}
+            onLimitChange={handleLimitChange}
+          />
         </div>
         <RightSidebar 
           tags={tags}
