@@ -67,14 +67,17 @@ const MainContent = ({ channels, isLoading = false }: MainContentProps) => {
                 <div>
                   <span className="text-xs font-semibold text-gray-500">Tags:</span>
                   <div className="mt-1 flex flex-wrap gap-1.5">
-                    {channel.tags.split(', ').map((tag, tagIndex) => (
-                      <span
-                        key={tagIndex}
-                        className="inline-block px-2 py-0.5 text-[10px] font-medium rounded-full border border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
-                      >
-                        {tag}
-                      </span>
-                    ))}
+                    {(channel.tags || '')
+                      .split(/,\s*/)
+                      .filter(Boolean)
+                      .map((tag, tagIndex) => (
+                        <span
+                          key={tagIndex}
+                          className="inline-block px-2 py-0.5 text-[10px] font-medium rounded-full border border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+                        >
+                          {tag}
+                        </span>
+                      ))}
                   </div>
                 </div>
               </div>
