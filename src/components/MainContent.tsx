@@ -49,19 +49,23 @@ const MainContent = ({ channels, isLoading = false, page = 1, limit = 20, total 
         {channels.map((channel, index) => (
           <div
             key={index}
-            className="relative bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer group"
-            onClick={() => handleChannelClick(channel.url)}
+            className="relative bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow group"
           >
             <div className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-800 group-hover:text-red-600 transition-colors">
                   {channel.name}
                 </h3>
-                <div className="flex-shrink-0">
+                <button
+                  type="button"
+                  className="flex-shrink-0 p-1 rounded hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500 cursor-pointer"
+                  onClick={() => handleChannelClick(channel.url)}
+                  aria-label="Open channel"
+                >
                   <svg className="w-5 h-5 text-gray-400 group-hover:text-red-500 transition-colors" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
                   </svg>
-                </div>
+                </button>
               </div>
 
               <div className="space-y-3">
