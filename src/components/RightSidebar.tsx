@@ -1,4 +1,5 @@
 import type { Tag } from '../types';
+import TagList from '../features/tags/components/TagList';
 
 interface RightSidebarProps {
   tags: Tag[];
@@ -7,24 +8,18 @@ interface RightSidebarProps {
 }
 
 const RightSidebar = ({ tags, selectedTags, onTagSelect }: RightSidebarProps) => {
+  const tagNames = tags.map(tag => tag.name);
+  
   return (
     <div className="w-96 bg-white shadow-md border-l border-gray-200 min-h-screen">
       <div className="p-4">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Tags</h2>
-        <div className="flex flex-wrap gap-2 max-h-[calc(100vh-120px)] overflow-y-auto">
-          {tags.map((tag) => (
-            <button
-              key={tag.name}
-              className={`px-2 py-1 text-xs font-medium rounded-full cursor-pointer transition-colors ${
-                selectedTags.includes(tag.name)
-                  ? 'bg-blue-100 text-blue-700 border border-blue-200 hover:bg-blue-200'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
-              }`}
-              onClick={() => onTagSelect(tag.name)}
-            >
-              {tag.name}
-            </button>
-          ))}
+        <div className="max-h-[calc(100vh-120px)] overflow-y-auto">
+          <TagList
+            tags={tagNames}
+            selectedTags={selectedTags}
+            onTagSelect={onTagSelect}
+          />
         </div>
       </div>
     </div>
