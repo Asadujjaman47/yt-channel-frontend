@@ -1,3 +1,5 @@
-// Shared UI components
-export { default as LoadingSpinner } from '../LoadingSpinner';
-export { default as ErrorBoundary } from '../ErrorBoundary';
+// Shared components
+export { default as Modal } from './Modal';
+export { default as AddCategoryModal } from './AddCategoryModal';
+export { default as AddTagModal } from './AddTagModal';
+export { default as AddChannelModal } from './AddChannelModal';

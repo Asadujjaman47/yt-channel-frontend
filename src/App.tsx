@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import Navbar from './components/Navbar.tsx';
 import LeftSidebar from './components/LeftSidebar.tsx';
 import RightSidebar from './components/RightSidebar.tsx';
@@ -12,10 +12,11 @@ function App() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(20);
+  const [refreshKey, setRefreshKey] = useState<number>(0);
 
   // API data fetching with React Query
-  const { data: categories = [], error: categoriesError } = useCategories();
-  const { data: tags = [], error: tagsError } = useTags();
+  const { data: categories = [], error: categoriesError, refetch: refetchCategories } = useCategories();
+  const { data: tags = [], error: tagsError, refetch: refetchTags } = useTags();
 
   // Build filters for channels query
   const channelFilters: ChannelFilters = { page, limit };
@@ -27,10 +28,18 @@ function App() {
     channelFilters.tags = selectedTags;
   }
 
-  const { data: channelsPage, isLoading: channelsLoading, error: channelsError } = useChannels(channelFilters);
+  const { data: channelsPage, isLoading: channelsLoading, error: channelsError, refetch: refetchChannels } = useChannels(channelFilters);
 
   const filteredChannels = channelsPage?.items ?? [];
   const paginationMeta = channelsPage?.meta;
+
+  // Refresh function for after modal operations
+  const handleDataChange = useCallback(() => {
+    refetchCategories();
+    refetchTags();
+    refetchChannels();
+    setRefreshKey(prev => prev + 1);
+  }, [refetchCategories, refetchTags, refetchChannels]);
 
   const handleCategorySelect = (categoryName: string) => {
     const willSelect = selectedCategory !== categoryName;
@@ -81,7 +90,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar onSearch={handleSearch} query={searchQuery} />
+      <Navbar onSearch={handleSearch} query={searchQuery} onDataChange={handleDataChange} />
       <div className="flex">
         <LeftSidebar 
           categories={categories}

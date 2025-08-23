@@ -13,7 +13,7 @@ export interface Channel {
   slug?: string;
   description?: string;
   category: string;
-  tags: string;
+  tags?: string;
   url: string;
   createdAt: string;
   updatedAt: string;
