@@ -25,6 +25,7 @@ const AddChannelModal: React.FC<AddChannelModalProps> = ({ isOpen, onClose, onSu
   const [tags, setTags] = useState<Tag[]>([]);
   const [filteredTags, setFilteredTags] = useState<Tag[]>([]);
   const [showTagSuggestions, setShowTagSuggestions] = useState(false);
+  const [showCategorySuggestions, setShowCategorySuggestions] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   // Load categories and tags when modal opens
@@ -161,25 +162,65 @@ const AddChannelModal: React.FC<AddChannelModalProps> = ({ isOpen, onClose, onSu
           <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
             Category *
           </label>
-          <select
-            id="category"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-          >
-            <option value="">Select a category</option>
-            {categories.length === 0 ? (
-              <option value="" disabled>No categories available - create one first</option>
-            ) : (
-              categories.map(category => (
-                <option key={category._id} value={category.name}>
-                  {category.name}
-                </option>
-              ))
+          
+          {/* Category Combobox */}
+          <div className="relative">
+            <div className="relative">
+              <input
+                type="text"
+                id="category"
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                onFocus={() => setShowCategorySuggestions(true)}
+                onBlur={() => setTimeout(() => setShowCategorySuggestions(false), 150)}
+                placeholder="Type to search categories..."
+                className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                required
+              />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+            
+            {/* Category suggestions dropdown */}
+            {showCategorySuggestions && categories.length > 0 && (
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+                {categories
+                  .filter(category => 
+                    category.name.toLowerCase().includes(formData.category.toLowerCase())
+                  )
+                  .map(category => (
+                    <button
+                      key={category._id}
+                      type="button"
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, category: category.name }));
+                        setShowCategorySuggestions(false);
+                      }}
+                      className="w-full text-left px-4 py-2.5 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none transition-colors"
+                    >
+                      {category.name}
+                    </button>
+                  ))}
+                {categories.filter(category => 
+                  category.name.toLowerCase().includes(formData.category.toLowerCase())
+                ).length === 0 && (
+                  <div className="px-4 py-2.5 text-sm text-gray-500">
+                    No categories match your search
+                  </div>
+                )}
+              </div>
             )}
-          </select>
+          </div>
+          
           {categories.length === 0 && (
             <p className="mt-2 text-sm text-amber-600">
               You need to create at least one category before adding channels.
