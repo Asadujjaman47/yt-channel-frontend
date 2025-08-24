@@ -233,60 +233,130 @@ const AddChannelModal: React.FC<AddChannelModalProps> = ({ isOpen, onClose, onSu
             Tags
           </label>
           
-          {/* Selected tags display */}
-          {selectedTags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-3">
-              {selectedTags.map(tag => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200"
-                >
-                  {tag}
-                  <button
-                    type="button"
-                    onClick={() => removeSelectedTag(tag)}
-                    className="ml-2 inline-flex items-center justify-center w-4 h-4 rounded-full text-blue-400 hover:bg-blue-200 hover:text-blue-600 focus:outline-none transition-colors"
-                  >
-                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Tag input with suggestions */}
+          {/* Modern Multi-tag Selection */}
           <div className="relative">
-            <input
-              type="text"
-              id="tags"
-              name="tags"
-              value={formData.tags}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-              placeholder={tags.length === 0 ? "No tags available - type to create new ones" : "Type to search tags or add new ones (comma-separated)"}
-            />
-            
-            {/* Tag suggestions dropdown */}
-            {showTagSuggestions && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
-                {filteredTags.map(tag => (
-                  <button
-                    key={tag._id}
-                    type="button"
-                    onClick={() => handleTagSelect(tag.name)}
-                    className="w-full text-left px-4 py-2.5 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none transition-colors"
+            {/* Selected tags display - Modern chip design */}
+            {selectedTags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                {selectedTags.map(tag => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200 shadow-sm hover:shadow-md transition-all duration-200"
                   >
-                    {tag.name}
-                  </button>
+                    <span className="flex items-center">
+                      <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10a1 1 0 01.293-.707l7-7a1 1 0 011.414 0l7 7z" clipRule="evenodd" />
+                      </svg>
+                      {tag}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removeSelectedTag(tag)}
+                      className="ml-1 inline-flex items-center justify-center w-5 h-5 rounded-full text-blue-400 hover:bg-blue-200 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all duration-200"
+                    >
+                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </span>
                 ))}
               </div>
             )}
+
+            {/* Tag input with modern combobox */}
+            <div className="relative">
+              <input
+                type="text"
+                id="tags"
+                name="tags"
+                value={formData.tags}
+                onChange={handleChange}
+                onFocus={() => setShowTagSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowTagSuggestions(false), 150)}
+                className="w-full px-4 py-3 pl-10 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                placeholder={tags.length === 0 ? "Type to create new tags..." : "Type to search or create tags..."}
+              />
+              
+              {/* Search icon */}
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              
+              {/* Tag icon */}
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+              </div>
+            </div>
+            
+            {/* Enhanced tag suggestions dropdown */}
+            {showTagSuggestions && (
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+                {/* Existing tags section */}
+                {filteredTags.length > 0 && (
+                  <div className="border-b border-gray-100">
+                    <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                      Existing Tags
+                    </div>
+                    {filteredTags.map(tag => (
+                      <button
+                        key={tag._id}
+                        type="button"
+                        onClick={() => handleTagSelect(tag.name)}
+                        className="w-full text-left px-4 py-2.5 hover:bg-blue-50 focus:bg-blue-50 focus:outline-none transition-colors flex items-center"
+                      >
+                        <svg className="w-4 h-4 mr-2 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10a1 1 0 01.293-.707l7-7a1 1 0 011.414 0l7 7z" clipRule="evenodd" />
+                        </svg>
+                        {tag.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Create new tag section */}
+                {formData.tags.trim() && !filteredTags.some(tag => tag.name.toLowerCase() === formData.tags.toLowerCase()) && (
+                  <div className="border-t border-gray-100">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newTag = formData.tags.trim();
+                        if (newTag && !selectedTags.includes(newTag)) {
+                          setSelectedTags(prev => [...prev, newTag]);
+                          setFormData(prev => ({ ...prev, tags: '' }));
+                          setShowTagSuggestions(false);
+                        }
+                      }}
+                      className="w-full text-left px-4 py-2.5 hover:bg-green-50 focus:bg-green-50 focus:outline-none transition-colors flex items-center"
+                    >
+                      <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                      Create "{formData.tags.trim()}"
+                    </button>
+                  </div>
+                )}
+                
+                {/* No results message */}
+                {filteredTags.length === 0 && !formData.tags.trim() && (
+                  <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                    Start typing to search tags or create new ones
+                  </div>
+                )}
+              </div>
+            )}
           </div>
+          
+          {/* Helpful information */}
           {tags.length === 0 && (
-            <p className="mt-2 text-sm text-blue-600">
-              No tags exist yet. You can type to create new tags or create them using the "Add Tag" button.
+            <p className="mt-2 text-sm text-blue-600 flex items-center">
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              No tags exist yet. You can type to create new tags or use the "Add Tag" button.
             </p>
           )}
         </div>
