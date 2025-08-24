@@ -1,5 +1,6 @@
 import type { Category } from '../types';
 import CategoryList from '../features/categories/components/CategoryList';
+import { useEffect } from 'react';
 
 interface LeftSidebarProps {
   categories: Category[];
@@ -9,6 +10,11 @@ interface LeftSidebarProps {
 
 const LeftSidebar = ({ categories, selectedCategory, onCategorySelect }: LeftSidebarProps) => {
   const categoryNames = categories.map(cat => cat.name);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [selectedCategory]);
+
   
   return (
     <div className="w-64 bg-white shadow-md border-r border-gray-200 min-h-screen">
