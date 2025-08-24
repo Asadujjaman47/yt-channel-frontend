@@ -53,6 +53,27 @@ const AddChannelModal: React.FC<AddChannelModalProps> = ({ isOpen, onClose, onSu
     }
   }, [showTagSuggestions]);
 
+  // Auto-scroll to keep highlighted items visible
+  useEffect(() => {
+    if (categoryHighlightedIndex >= 0 && showCategorySuggestions) {
+      const dropdown = document.querySelector('[data-category-dropdown]');
+      const highlightedItem = dropdown?.querySelector(`[data-index="${categoryHighlightedIndex}"]`);
+      if (highlightedItem) {
+        highlightedItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+  }, [categoryHighlightedIndex, showCategorySuggestions]);
+
+  useEffect(() => {
+    if (tagHighlightedIndex >= 0 && showTagSuggestions) {
+      const dropdown = document.querySelector('[data-tag-dropdown]');
+      const highlightedItem = dropdown?.querySelector(`[data-index="${tagHighlightedIndex}"]`);
+      if (highlightedItem) {
+        highlightedItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+  }, [tagHighlightedIndex, showTagSuggestions]);
+
   const loadCategories = async () => {
     try {
       const categoriesData = await apiService.getCategories();
@@ -292,8 +313,8 @@ const AddChannelModal: React.FC<AddChannelModalProps> = ({ isOpen, onClose, onSu
             </div>
             
             {/* Category suggestions dropdown */}
-            {showCategorySuggestions && categories.length > 0 && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+            {showCategorySuggestions && (
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto" data-category-dropdown>
                 {categories
                   .filter(category => 
                     category.name.toLowerCase().includes(formData.category.toLowerCase())
@@ -307,6 +328,7 @@ const AddChannelModal: React.FC<AddChannelModalProps> = ({ isOpen, onClose, onSu
                         setShowCategorySuggestions(false);
                         setCategoryHighlightedIndex(-1);
                       }}
+                      data-index={index}
                       className={`w-full text-left px-4 py-2.5 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none transition-colors ${
                         categoryHighlightedIndex === index ? 'bg-blue-50' : ''
                       }`}
@@ -399,7 +421,7 @@ const AddChannelModal: React.FC<AddChannelModalProps> = ({ isOpen, onClose, onSu
             
             {/* Enhanced tag suggestions dropdown */}
             {showTagSuggestions && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto" data-tag-dropdown>
                 {/* Existing tags section */}
                 {filteredTags.length > 0 && (
                   <div className="border-b border-gray-100">
@@ -411,6 +433,7 @@ const AddChannelModal: React.FC<AddChannelModalProps> = ({ isOpen, onClose, onSu
                         key={tag._id}
                         type="button"
                         onClick={() => handleTagSelect(tag.name)}
+                        data-index={index}
                         className={`w-full text-left px-4 py-2.5 hover:bg-blue-50 focus:bg-blue-50 focus:outline-none transition-colors flex items-center ${
                           tagHighlightedIndex === index ? 'bg-blue-50' : ''
                         }`}
