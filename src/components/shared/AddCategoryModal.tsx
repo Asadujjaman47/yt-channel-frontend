@@ -9,8 +9,6 @@ interface AddCategoryModalProps {
 }
 
 const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ isOpen, onClose, onSuccess }) => {
-  console.log('AddCategoryModal render:', { isOpen });
-  
   const [formData, setFormData] = useState({
     name: '',
     description: ''

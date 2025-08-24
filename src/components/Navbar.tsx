@@ -40,17 +40,14 @@ const Navbar = ({ onSearch, query, onDataChange }: NavbarProps) => {
   };
 
   const openCategoryModal = () => {
-    console.log('Opening category modal');
     setIsCategoryModalOpen(true);
   };
 
   const openTagModal = () => {
-    console.log('Opening tag modal');
     setIsTagModalOpen(true);
   };
 
   const openChannelModal = () => {
-    console.log('Opening channel modal');
     setIsChannelModalOpen(true);
   };
 

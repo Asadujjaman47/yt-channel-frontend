@@ -27,6 +27,10 @@ const AddChannelModal: React.FC<AddChannelModalProps> = ({ isOpen, onClose, onSu
   const [showTagSuggestions, setShowTagSuggestions] = useState(false);
   const [showCategorySuggestions, setShowCategorySuggestions] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  
+  // Keyboard navigation states
+  const [categoryHighlightedIndex, setCategoryHighlightedIndex] = useState(-1);
+  const [tagHighlightedIndex, setTagHighlightedIndex] = useState(-1);
 
   // Load categories and tags when modal opens
   useEffect(() => {
@@ -35,6 +39,19 @@ const AddChannelModal: React.FC<AddChannelModalProps> = ({ isOpen, onClose, onSu
       loadTags();
     }
   }, [isOpen]);
+
+  // Reset highlighted indices when dropdowns close
+  useEffect(() => {
+    if (!showCategorySuggestions) {
+      setCategoryHighlightedIndex(-1);
+    }
+  }, [showCategorySuggestions]);
+
+  useEffect(() => {
+    if (!showTagSuggestions) {
+      setTagHighlightedIndex(-1);
+    }
+  }, [showTagSuggestions]);
 
   const loadCategories = async () => {
     try {
@@ -102,6 +119,52 @@ const AddChannelModal: React.FC<AddChannelModalProps> = ({ isOpen, onClose, onSu
         setShowTagSuggestions(false);
       }
     }
+    
+    // Handle category input for suggestions
+    if (name === 'category') {
+      setShowCategorySuggestions(true);
+      setCategoryHighlightedIndex(-1);
+    }
+  };
+
+  const handleCategoryKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const filteredCategories = categories.filter(category => 
+      category.name.toLowerCase().includes(formData.category.toLowerCase())
+    );
+    
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setShowCategorySuggestions(true);
+        setCategoryHighlightedIndex(prev => 
+          prev < filteredCategories.length - 1 ? prev + 1 : prev
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setShowCategorySuggestions(true);
+        setCategoryHighlightedIndex(prev => 
+          prev > 0 ? prev - 1 : -1
+        );
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (categoryHighlightedIndex >= 0 && filteredCategories[categoryHighlightedIndex]) {
+          const selectedCategory = filteredCategories[categoryHighlightedIndex];
+          setFormData(prev => ({ ...prev, category: selectedCategory.name }));
+          setShowCategorySuggestions(false);
+          setCategoryHighlightedIndex(-1);
+        }
+        break;
+      case 'Escape':
+        setShowCategorySuggestions(false);
+        setCategoryHighlightedIndex(-1);
+        break;
+      case 'Tab':
+        setShowCategorySuggestions(false);
+        setCategoryHighlightedIndex(-1);
+        break;
+    }
   };
 
   const handleTagSelect = (tagName: string) => {
@@ -114,6 +177,43 @@ const AddChannelModal: React.FC<AddChannelModalProps> = ({ isOpen, onClose, onSu
 
   const removeSelectedTag = (tagName: string) => {
     setSelectedTags(prev => prev.filter(tag => tag !== tagName));
+  };
+
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const availableOptions = filteredTags;
+    
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setShowTagSuggestions(true);
+        setTagHighlightedIndex(prev => 
+          prev < availableOptions.length - 1 ? prev + 1 : prev
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setShowTagSuggestions(true);
+        setTagHighlightedIndex(prev => 
+          prev > 0 ? prev - 1 : prev
+        );
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (tagHighlightedIndex >= 0 && availableOptions[tagHighlightedIndex]) {
+          const selectedOption = availableOptions[tagHighlightedIndex];
+          handleTagSelect(selectedOption.name);
+          setTagHighlightedIndex(-1);
+        }
+        break;
+      case 'Escape':
+        setShowTagSuggestions(false);
+        setTagHighlightedIndex(-1);
+        break;
+      case 'Tab':
+        setShowTagSuggestions(false);
+        setTagHighlightedIndex(-1);
+        break;
+    }
   };
 
   const isFormValid = formData.name.trim() && formData.category && formData.url.trim() && categories.length > 0;
@@ -174,6 +274,7 @@ const AddChannelModal: React.FC<AddChannelModalProps> = ({ isOpen, onClose, onSu
                 onChange={handleChange}
                 onFocus={() => setShowCategorySuggestions(true)}
                 onBlur={() => setTimeout(() => setShowCategorySuggestions(false), 150)}
+                onKeyDown={handleCategoryKeyDown}
                 placeholder="Type to search categories..."
                 className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                 required
@@ -197,15 +298,18 @@ const AddChannelModal: React.FC<AddChannelModalProps> = ({ isOpen, onClose, onSu
                   .filter(category => 
                     category.name.toLowerCase().includes(formData.category.toLowerCase())
                   )
-                  .map(category => (
+                  .map((category, index) => (
                     <button
                       key={category._id}
                       type="button"
                       onClick={() => {
                         setFormData(prev => ({ ...prev, category: category.name }));
                         setShowCategorySuggestions(false);
+                        setCategoryHighlightedIndex(-1);
                       }}
-                      className="w-full text-left px-4 py-2.5 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none transition-colors"
+                      className={`w-full text-left px-4 py-2.5 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none transition-colors ${
+                        categoryHighlightedIndex === index ? 'bg-blue-50' : ''
+                      }`}
                     >
                       {category.name}
                     </button>
@@ -273,8 +377,9 @@ const AddChannelModal: React.FC<AddChannelModalProps> = ({ isOpen, onClose, onSu
                 onChange={handleChange}
                 onFocus={() => setShowTagSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowTagSuggestions(false), 150)}
+                onKeyDown={handleTagKeyDown}
                 className="w-full px-4 py-3 pl-10 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                placeholder={tags.length === 0 ? "Type to create new tags..." : "Type to search or create tags..."}
+                placeholder="Type to search existing tags..."
               />
               
               {/* Search icon */}
@@ -301,12 +406,14 @@ const AddChannelModal: React.FC<AddChannelModalProps> = ({ isOpen, onClose, onSu
                     <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                       Existing Tags
                     </div>
-                    {filteredTags.map(tag => (
+                    {filteredTags.map((tag, index) => (
                       <button
                         key={tag._id}
                         type="button"
                         onClick={() => handleTagSelect(tag.name)}
-                        className="w-full text-left px-4 py-2.5 hover:bg-blue-50 focus:bg-blue-50 focus:outline-none transition-colors flex items-center"
+                        className={`w-full text-left px-4 py-2.5 hover:bg-blue-50 focus:bg-blue-50 focus:outline-none transition-colors flex items-center ${
+                          tagHighlightedIndex === index ? 'bg-blue-50' : ''
+                        }`}
                       >
                         <svg className="w-4 h-4 mr-2 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10a1 1 0 01.293-.707l7-7a1 1 0 011.414 0l7 7z" clipRule="evenodd" />
@@ -317,48 +424,16 @@ const AddChannelModal: React.FC<AddChannelModalProps> = ({ isOpen, onClose, onSu
                   </div>
                 )}
                 
-                {/* Create new tag section */}
-                {formData.tags.trim() && !filteredTags.some(tag => tag.name.toLowerCase() === formData.tags.toLowerCase()) && (
-                  <div className="border-t border-gray-100">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const newTag = formData.tags.trim();
-                        if (newTag && !selectedTags.includes(newTag)) {
-                          setSelectedTags(prev => [...prev, newTag]);
-                          setFormData(prev => ({ ...prev, tags: '' }));
-                          setShowTagSuggestions(false);
-                        }
-                      }}
-                      className="w-full text-left px-4 py-2.5 hover:bg-green-50 focus:bg-green-50 focus:outline-none transition-colors flex items-center"
-                    >
-                      <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                      </svg>
-                      Create "{formData.tags.trim()}"
-                    </button>
-                  </div>
-                )}
-                
                 {/* No results message */}
                 {filteredTags.length === 0 && !formData.tags.trim() && (
                   <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                    Start typing to search tags or create new ones
+                    Start typing to search tags
                   </div>
                 )}
               </div>
             )}
           </div>
           
-          {/* Helpful information */}
-          {tags.length === 0 && (
-            <p className="mt-2 text-sm text-blue-600 flex items-center">
-              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              No tags exist yet. You can type to create new tags or use the "Add Tag" button.
-            </p>
-          )}
         </div>
 
         <div>
